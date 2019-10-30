@@ -27,15 +27,18 @@ options:
     description:
     - The name of the AWS Config resource.
     required: true
+    type: str
   state:
     description:
     - Whether the Config rule should be present or absent.
     default: present
     choices: ['present', 'absent']
+    type: str
   role_arn:
     description:
     - Amazon Resource Name (ARN) of the IAM role used to describe the AWS resources associated with the account.
     - Required when state=present
+    type: str
   recording_group:
     description:
     - Specifies the types of AWS resources for which AWS Config records configuration changes.
@@ -61,6 +64,7 @@ options:
         - A list that specifies the types of AWS resources for which AWS Config records configuration changes (for example,
           `AWS::EC2::Instance` or `AWS::CloudTrail::Trail`).
         - Before you can set this option to `true`, you must set the `all_supported` option to `false`.
+    type: dict
 extends_documentation_fragment:
   - aws
   - ec2
@@ -183,6 +187,10 @@ def main():
         if module.params.get('recording_group').get('resource_types'):
             params['recordingGroup'].update({
                 'resourceTypes': module.params.get('recording_group').get('resource_types')
+            })
+        else:
+            params['recordingGroup'].update({
+                'resourceTypes': []
             })
 
     client = module.client('config', retry_decorator=AWSRetry.jittered_backoff())
